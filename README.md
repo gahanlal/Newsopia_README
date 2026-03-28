@@ -9,7 +9,7 @@
 [![LangGraph](https://img.shields.io/badge/LangGraph-00A67E?style=flat-square&logo=chainlink&logoColor=white)](https://langchain.com)
 [![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4o-412991?style=flat-square&logo=openai&logoColor=white)](https://openai.com)
 
-**A 12-agent AI system that reads, understands, cross-verifies, and explains the news — so you don't have to.**
+**A 17-agent AI system that reads, understands, cross-verifies, and explains the news — so you don't have to.**
 
 </div>
 
@@ -35,7 +35,7 @@ The result: a user asks a plain-English question and receives a comprehensive, s
 
 Newsopia's core is a **LangGraph state machine** — a directed acyclic graph where each node is a specialized AI agent. Every user query flows through this pipeline, and the graph dynamically decides which agents activate based on the query's intent.
 
-### The 12-Agent Pipeline
+### The 17-Agent Pipeline
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
@@ -120,14 +120,28 @@ Newsopia's core is a **LangGraph state machine** — a directed acyclic graph wh
                    └──────────┬──────────┘
                               │
                               ▼
-    ⑨          ┌──────────────────────┐
+        ┌─────────────────────────────────────────────┐
+        │        ⑨  ENRICHMENT LAYER (parallel)       │
+        │     5 agents run simultaneously (15s cap)   │
+        ├─────────┬─────────┬─────────┬───────┬───────┤
+        │  Fact   │ Trend   │Sentiment│Region │Source │
+        │  Check  │ Context │  Map    │Impact │ Bias  │
+        │         │         │         │       │       │
+        │ Cross-  │Historic │ Mood    │Geo    │Framing│
+        │ ref     │parallels│ gauge   │impact │& lean │
+        │ claims  │& traject│ 0-100   │mapping│detect │
+        └────┬────┴────┬────┴────┬────┴───┬───┴───┬───┘
+             └─────────┴─────────┴────────┴───────┘
+                              │
+                              ▼
+    ⑩          ┌──────────────────────┐
                │  Response Aggregator  │  Structures the final output:
                │                      │  answer, articles, citations,
-               │                      │  analytics, impact summaries.
+               │                      │  analytics, enrichment data.
                └──────────┬───────────┘
                           │
                           ▼
-    ⑩          ┌──────────────────────┐
+    ⑪          ┌──────────────────────┐
                │      QA Agent        │  Handles follow-up questions,
                │                      │  casual chat, and help requests.
                │                      │  Source-cited, language-aware.
@@ -136,9 +150,21 @@ Newsopia's core is a **LangGraph state machine** — a directed acyclic graph wh
                           ▼
                ┌──────────────────────┐
                │     FINAL RESPONSE   │  Answer + articles + analytics
-               │     (cached 2 min)   │  delivered to the user.
+               │     (cached 2 min)   │  + enrichment insights.
                └──────────────────────┘
 ```
+
+### Enrichment Agents (run in parallel after synthesis)
+
+| Agent | Purpose | Key Output |
+|-------|---------|------------|
+| **Fact Check Agent** | Cross-references claims across sources, detects contradictions | Confidence score (0–100), verification labels (✅ High / ⚠️ Partial / ❌ Conflicting) |
+| **Trend Context Agent** | Historical parallels, trajectory analysis | Escalating / Stable / De-escalating trajectory, timeline, pattern detection |
+| **Sentiment Aggregation Agent** | Cross-source mood gauge, emotion breakdown | Sentiment score (0–100), divergence detection between sources |
+| **Regional Impact Agent** | Geographic impact mapping, epicenter detection | Affected regions, personalized local impact based on user location |
+| **Source Bias Agent** | Framing analysis, political leaning detection (30+ known sources) | Bias spectrum, loaded language detection, media literacy tips |
+
+> All enrichment agents have **smart gating** — they only activate when relevant signals are detected (e.g., Trend Context requires trend keywords, Source Bias needs 2+ distinct sources). Each has a **rule-based fallback** that works without API keys.
 
 ### Supporting Agents (outside the main pipeline)
 
@@ -155,6 +181,7 @@ Newsopia's core is a **LangGraph state machine** — a directed acyclic graph wh
 |-------------|--------|
 | **Single-pass pipeline** | Eliminated the old double-call pattern (search + re-answer). ~40-60% faster. |
 | **Parallel agent execution** | Financial + Global + Social agents run simultaneously with individual 20s timeouts. ~3× faster than sequential. |
+| **Parallel enrichment layer** | 5 enrichment agents (Fact Check, Trend, Sentiment, Regional, Bias) run in parallel via ThreadPoolExecutor with 15s timeout. Non-blocking — failures are silently skipped. |
 | **Parallel web scraping** | 3 search engines queried simultaneously. |
 | **Dynamic summarizer scaling** | Worker pool scales from 4→8 based on article count. |
 | **Response caching** | MD5-hashed cache with 2-min TTL and normalized query keys. Near-identical queries ("Apple stock today" vs "today apple stock") hit the same cache. |
@@ -220,7 +247,8 @@ Cross-referencing is the strongest differentiator — rather than relying on a s
 | **LLM** | OpenAI GPT-4o-mini (temp=0 for deterministic output) |
 | **Frontend** | Streamlit with custom CSS (glassmorphism dark theme) |
 | **Database** | Supabase (PostgreSQL + Row-Level Security) |
-| **Financial Data** | yfinance → Polygon.io → Twelve Data (3-tier fallback) |
+| **Financial Data** | yfinance → Finnhub → FMP → Twelve Data → Polygon.io (5-tier fallback chain) |
+| **Enrichment** | 5 parallel agents: Fact Check, Trend Context, Sentiment, Regional Impact, Source Bias |
 | **Web Scraping** | BeautifulSoup + requests (parallel, multi-engine) |
 | **Caching** | In-memory with MD5 keys + normalized queries |
 | **Deployment** | Streamlit Cloud / any Python host |
@@ -267,6 +295,7 @@ Open `http://localhost:8501` in your browser.
 | Text only | **Live stock data**, sector analysis, risk assessment |
 | Sequential processing | **Parallel multi-agent pipeline** with graceful degradation |
 | Static results | **Streaming responses** with smart caching |
+| No context beyond headlines | **5 enrichment agents** add trend analysis, sentiment maps, regional impact, bias detection |
 
 ---
 
@@ -280,6 +309,6 @@ This project is proprietary. All rights reserved.
 
 **Built with 🧠 by the Newsopia team**
 
-*12 AI agents. 3 search engines. 120+ trusted sources. One intelligent answer.*
+*17 AI agents. 5 search engines. 120+ trusted sources. One intelligent answer.*
 
 </div>
