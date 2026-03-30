@@ -1,7 +1,5 @@
 # 🌐 NEWSOPIA — AI-Powered News Intelligence Platform
 
-newsopia.streamlit.app
-
 <div align="center">
 
 ![Newsopia](https://img.shields.io/badge/NEWSOPIA-News%20Intelligence-667eea?style=for-the-badge&logo=newspaper&logoColor=white)
