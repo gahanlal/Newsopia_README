@@ -338,7 +338,7 @@ This project is proprietary. All rights reserved.
 
 <div align="center">
 
-**Built with 🧠 by the Newsopia team**
+**Built with 🧠 by Gahan K Lal**
 
 *17 AI agents. 5 search engines. 120+ trusted sources. One intelligent answer.*
 
