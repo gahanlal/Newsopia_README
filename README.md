@@ -213,29 +213,60 @@ Cross-referencing is the strongest differentiator — rather than relying on a s
 ## 🎯 Key Product Features
 
 ### 💬 Dual Chat Modes
-- **General Mode** — Objective, balanced analysis
-- **Personal Mode** — Every answer is tailored to the user's saved interests, location, and custom prompts (e.g., "Always tell me how this affects India's IT sector")
+- **General Mode** — Objective, balanced analysis of news without personal context
+- **Personal Mode** — Every answer is deeply tailored to YOU:
+  - **Interests**: News angles aligned with your saved topics
+  - **Location**: Geographic impact specific to your city/country (local prices, policies, job market)
+  - **Occupation**: Career-specific implications (e.g., how tech news affects software engineers vs. doctors)
+  - **Bio/Background**: Personalized context from your profile
+  - **Custom Prompts**: Special instructions you set (e.g., "Always tell me how this affects India's IT sector")
+  
+  *Example: An AI engineer in Singapore asking about AI regulation in General Mode gets objective policy analysis. In Personal Mode, the same query includes: job market impact in Singapore, visa implications for foreign AI talent, local regulatory timeline, and specific actions they should take.*
+
+### 💻 Multi-Tab Interface
+- **Chat**: Converse with all 17 agents; ask follow-up questions, get instant citations
+- **Local News**: Location-based news for your city/country with quick topic buttons
+- **Collections**: Save & organize articles into custom collections (Favorites, Reading List, etc.)
+- **Search History**: Browse and replay past searches
+- **Settings**: Customize all preferences, language, interests, and custom prompts
+- **Profile**: Manage your personal information for better personalization
+- **Admin Panel** (for admins): User management, analytics, system monitoring
+
+### 🎯 User Preferences & Customization
+- **Profile Management**: Full name, occupation, bio, phone, gender, date of birth, website, social links
+- **Interests & Topics**: Save unlimited custom topics and have news filtered to your preferences
+- **Custom News Prompts**: Define special instructions (e.g., "Focus on India's perspective", "Include climate implications")
+- **UI Theme**: Dark/light mode toggle
+- **Results Per Page**: Customize how many articles appear per query
+- **Smart Caching**: 2-minute response cache with query normalization (similar queries share results)
+- **Search History**: Automatic tracking of all your searches
+- **Saved Collections**: Organize articles into custom collections (Favorites, Reading List, etc.)
 
 ### 🌍 Multilingual Intelligence
 - Search in English + native language simultaneously (50/50 bilingual mode)
 - UI translations on-demand
 - All agents respond in the user's preferred language
+- Auto-translate toggle for news content
 
 ### 📊 Real-Time Analytics
 - Sentiment distribution across articles
 - Source diversity charts
 - Trending topics extraction
 - Category breakdown
+- Article credibility scores displayed with each result
+- Daily usage insights and search trends
 
 ### 🔐 Authentication & Guest Access
 - Full auth flow with OTP verification
 - Persistent sessions with cookie-based recovery
 - Guest mode with configurable daily quotas
+- Row-Level Security (RLS) enforced on all user data
+- Password hashing with PBKDF2 + per-user salt
 
 ### 💾 Collections & Alerts
 - Save articles to custom collections
 - Topic-based alerts (instant, daily, weekly)
-- JSON export
+- JSON export of articles and collections
 
 ---
 
