@@ -9,6 +9,8 @@
 [![LangGraph](https://img.shields.io/badge/LangGraph-00A67E?style=flat-square&logo=chainlink&logoColor=white)](https://langchain.com)
 [![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4o-412991?style=flat-square&logo=openai&logoColor=white)](https://openai.com)
 
+**Live at: https://newsopia.streamlit.app**
+
 **A 17-agent AI system that reads, understands, cross-verifies, and explains the news — so you don't have to.**
 
 </div>
