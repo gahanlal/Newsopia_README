@@ -31,6 +31,67 @@ The result: a user asks a plain-English question and receives a comprehensive, s
 
 ---
 
+## 📈 Evolution: From Simple Foundation to Intelligent Knowledge Graph
+
+Newsopia's architecture evolved through deliberate phases, each building on the previous:
+
+### Phase 1: Foundation
+Started with a basic multi-agent system: search aggregator → article processor → QA agent. Single language, no specialization.
+
+### Phase 2: Domain Specialist Agents
+Added specialized agents that could reason within specific domains:
+- **Financial Impact Agent** — Live stock data, sector analysis, market risk assessment
+- **Social Impact Agent** — Public sentiment, cultural impact, social movements
+
+Each agent could now provide deep domain expertise, but queries had to be manually routed to the right agent.
+
+### Phase 3: Multilingual News Article Pulling
+Implemented parallel multilingual search and content fetching:
+- Search in English + user's native language simultaneously (50/50 bilingual mode)
+- Fetch articles in both languages
+- UI dynamically switches to user's preferred language for articles and responses
+- Result: Global news coverage without language barriers
+
+### Phase 4: Credibility & Verification Layer
+Added fact-checking and source verification:
+- **120+ Trusted Outlets Database**: Cross-reference articles against verified sources
+- **5-Signal Credibility Engine**: Source reputation, cross-referencing, AI verification, linguistic analysis, article structure
+- **Fake News Detector**: Multi-signal analysis producing 0-100 credibility score with verdict
+
+### Phase 5: Full 17-Agent Pipeline
+Expanded from 3 domain agents to a complete intelligent pipeline:
+- **Query Analysis & Routing** — Intent detection, category classification, complexity assessment
+- **Search Optimization** — Engine-specific query variants for Google, Bing, DuckDuckGo
+- **Content Processing & Fetching** — Full article extraction, deduplication, relevance scoring
+- **AI Summarization** — Parallel summaries with structured insights
+- **3 Specialized Domain Agents** — Financial, Global, Social impact analysis
+- **Synthesis Engine** — Unifies multi-agent perspectives
+- **5 Enrichment Agents** — Fact-checking, trend analysis, sentiment mapping, regional impact, bias detection
+- **Response Aggregation** — Structures final output
+- **QA Agent** — Handles follow-ups and casual chat
+
+System now automatically routes complex queries to the right agents and synthesizes their perspectives.
+
+### Phase 6: Multi-Domain Knowledge Graph (Current)
+Introduced a sophisticated knowledge graph engine connecting 11 domains with 44 weighted causal edges:
+
+**The 11 Domains**: War, Finance, Energy, Geopolitics, Social, Tech, Health, Trade, Environment, Food, Economy
+
+**How It Works:**
+1. **Detects primary domain(s)** from your query using keyword matching and entity recognition
+2. **Traverses the knowledge graph** to find 1-2 hop neighbors across related domains (e.g., War → Energy → Finance → Markets)
+3. **Identifies blind spots** — domains connected to your query but not covered by scraped articles
+4. **Extracts cross-article entities** — recognizes when the same actors/organizations appear across multiple articles
+5. **Synthesizes cross-domain intelligence** — generates a brief explaining causal chains and interconnected impacts
+
+**Example:** Query: "What's happening with the war in Ukraine?"
+- **Before Phase 6:** Shows articles about military operations and casualties
+- **With Knowledge Graph:** Automatically maps War → Energy (oil sanctions) → Finance (markets) → Trade (grain exports) → Food (prices) — connecting the dots the articles don't explicitly mention. Flags blind spots: "Trade domain is 40% covered, Food domain is 20% covered."
+
+**The 44-Edge Ontology:** War DISRUPTS Energy (weight: 9), Energy INFLUENCES Finance (weight: 9), Trade AFFECTS Food (weight: 8), Geopolitics DRIVES Tech (weight: 7) — each with causal descriptions so the LLM reasons about **why** domains are connected, not just **that** they are.
+
+---
+
 ## 🏗️ System Architecture — How the Agents Work Together
 
 Newsopia's core is a **LangGraph state machine** — a directed acyclic graph where each node is a specialized AI agent. Every user query flows through this pipeline, and the graph dynamically decides which agents activate based on the query's intent.
@@ -87,6 +148,16 @@ Newsopia's core is a **LangGraph state machine** — a directed acyclic graph wh
        │  (parallel LLM)  │  Generates structured insights with JSON output.
        └────────┬─────────┘
                 │
+                ▼
+    ⑦  ┌─────────────────┐
+       │ Knowledge Graph  │  Multi-domain ontology engine: detects primary
+       │    Engine       │  domains from query, traverses 1-2 hops across
+       │  (11 domains,   │  44 causal edges, identifies blind spots, extracts
+       │   44 edges)     │  cross-article entities, synthesizes cross-domain
+       │                 │  intelligence brief. Output: domain mapping,
+       │                 │  causal chains, blind spots, coverage scores.
+       └────────┬─────────┘
+                │
         ┌───────┴────────────────────────────────────────┐
         │         INTELLIGENT ROUTING DECISION            │
         │  Based on Intent Router's agent activation:     │
@@ -98,7 +169,7 @@ Newsopia's core is a **LangGraph state machine** — a directed acyclic graph wh
         └───────┬─────────┴──────┬───────┴───────┬───────┘
                 │                │               │
                 ▼                ▼               ▼
-    ⑦  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐
+    ⑧  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐
        │  Financial    │ │   Global     │ │   Social     │
        │  Impact Agent │ │ Impact Agent │ │ Impact Agent │
        │              │ │              │ │              │
@@ -115,14 +186,14 @@ Newsopia's core is a **LangGraph state machine** — a directed acyclic graph wh
               └────────────────┼─────────────────┘
                                │
                     ┌──────────▼──────────┐
-    ⑧              │     Synthesis       │  For multi-agent queries:
+    ⑨              │     Synthesis       │  For multi-agent queries:
                    │   (LLM unification) │  Merges all perspectives into
                    │                     │  one actionable briefing.
                    └──────────┬──────────┘
                               │
                               ▼
         ┌─────────────────────────────────────────────┐
-        │        ⑨  ENRICHMENT LAYER (parallel)       │
+        │        ⑩  ENRICHMENT LAYER (parallel)       │
         │     5 agents run simultaneously (15s cap)   │
         ├─────────┬─────────┬─────────┬───────┬───────┤
         │  Fact   │ Trend   │Sentiment│Region │Source │
@@ -135,14 +206,14 @@ Newsopia's core is a **LangGraph state machine** — a directed acyclic graph wh
              └─────────┴─────────┴────────┴───────┘
                               │
                               ▼
-    ⑩          ┌──────────────────────┐
+    ⑪          ┌──────────────────────┐
                │  Response Aggregator  │  Structures the final output:
                │                      │  answer, articles, citations,
                │                      │  analytics, enrichment data.
                └──────────┬───────────┘
                           │
                           ▼
-    ⑪          ┌──────────────────────┐
+    ⑫          ┌──────────────────────┐
                │      QA Agent        │  Handles follow-up questions, casual chat,
                │    (GPT-4o based)    │  and help. ANSWER-FIRST approach: directly
                │                      │  addresses the question before providing
@@ -179,28 +250,7 @@ Newsopia's core is a **LangGraph state machine** — a directed acyclic graph wh
 
 ---
 
-## 📄 Enhanced Article Data Collection
-
-Newsopia now fetches **full article content** for the top 8 most relevant articles before passing them to the QA agent — a critical improvement that dramatically increases answer quality.
-
-### Why This Matters
-Before, the pipeline was passing only titles + 300-character snippets to the QA agent. When asked "why did X happen?", the agent had almost no detail to work with. Now:
-
-| Metric | Before | After |
-|--------|--------|-------|
-| **Context per article** | ~300 chars (snippet only) | ~3000 chars (full article text) |
-| **Data availability** | Titles + headlines | Full body text + context |
-| **Why-question success** | Low | High |
-| **Latency** | Fast | +3-5s (parallel fetching) |
-
-### How It Works
-1. After content processor ranks articles by relevance, the **top 8** are selected
-2. **Parallel content fetching** (4 workers, 12s timeout) extracts main text from each URL
-3. Smart CSS selectors target article containers (`<article>`, `.article-body`, etc.)
-4. Fallback to collecting all substantial `<p>` tags if extraction fails
-5. Result: QA agent gets full article text instead of snippets
-
----
+## ⚡ Performance Optimizations
 
 | Optimization | Impact |
 |-------------|--------|
@@ -339,40 +389,6 @@ streamlit run app.py
 ```
 
 Open `http://localhost:8501` in your browser.
-
----
-
-## 🔗 Multi-Domain Knowledge Graph
-
-Newsopia now features a sophisticated **knowledge graph engine** that connects disparate domains (war, finance, energy, geopolitics, social, tech, health, trade, environment, food, economy) to uncover hidden relationships and blind spots.
-
-### How It Works
-
-When you ask a question, the system:
-
-1. **Detects the primary domain(s)** from your query using keyword matching and entity recognition
-2. **Traverses the knowledge graph** to find 1-2 hop neighbors across related domains (e.g., War → Energy → Finance → Markets)
-3. **Identifies blind spots** — domains connected to your query but not covered by scraped articles
-4. **Extracts cross-article entities** — recognizes when the same actors/organizations appear across multiple articles
-5. **Synthesizes cross-domain intelligence** — generates a brief explaining causal chains and interconnected impacts
-
-### Why This Matters
-
-**Example:** You ask "What's happening with the war in Ukraine?"
-- **Old behavior:** Shows articles about military operations and casualties
-- **New behavior:** Automatically maps War → Energy (oil sanctions) → Finance (markets) → Trade (grain exports) → Food (prices) — connecting the dots the articles don't explicitly mention
-
-The system flags **blind spots** (e.g., "Trade domain is connected but only 20% covered by articles") so you know what's missing from the news coverage.
-
-### The 44-Edge Ontology
-
-The knowledge graph includes 44 weighted, causal relationships like:
-- War DISRUPTS Energy (weight: 9)
-- Energy INFLUENCES Finance (weight: 9)
-- Trade AFFECTS Food (weight: 8)
-- Geopolitics DRIVES Tech (weight: 7)
-
-Each edge includes a causal description (e.g., "sanctions block oil supplies, raising prices globally") so the LLM can reason about **why** domains are connected, not just **that** they are.
 
 ---
 
