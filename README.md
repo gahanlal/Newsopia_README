@@ -9,8 +9,6 @@
 [![LangGraph](https://img.shields.io/badge/LangGraph-00A67E?style=flat-square&logo=chainlink&logoColor=white)](https://langchain.com)
 [![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4o-412991?style=flat-square&logo=openai&logoColor=white)](https://openai.com)
 
-**Live at: https://newsopia.streamlit.app**
-
 **A 17-agent AI system that reads, understands, cross-verifies, and explains the news — so you don't have to.**
 
 </div>
@@ -76,10 +74,11 @@ Newsopia's core is a **LangGraph state machine** — a directed acyclic graph wh
                 │
                 ▼
     ⑤  ┌─────────────────┐
-       │Content Processor │  No LLM — pure speed. Deduplicates articles,
-       │  (rule-based)    │  classifies categories, analyzes sentiment,
-       │                  │  extracts keywords, and scores by relevance
-       │                  │  + freshness (breaking news floats to top).
+       │Content Processor │  Deduplicates articles, classifies categories,
+       │  (rule-based)    │  analyzes sentiment, extracts keywords, scores
+       │  + full content  │  by relevance + freshness. Fetches FULL ARTICLE
+       │    fetching      │  CONTENT for top 8 articles in parallel (critical
+       │                  │  for answer quality). Rule-based, no LLM.
        └────────┬─────────┘
                 │
                 ▼
@@ -144,9 +143,12 @@ Newsopia's core is a **LangGraph state machine** — a directed acyclic graph wh
                           │
                           ▼
     ⑪          ┌──────────────────────┐
-               │      QA Agent        │  Handles follow-up questions,
-               │                      │  casual chat, and help requests.
-               │                      │  Source-cited, language-aware.
+               │      QA Agent        │  Handles follow-up questions, casual chat,
+               │    (GPT-4o based)    │  and help. ANSWER-FIRST approach: directly
+               │                      │  addresses the question before providing
+               │                      │  supporting details. Full article content
+               │                      │  fed directly (not just snippets). Language
+               │                      │  & source-aware with smart caching.
                └──────────┬───────────┘
                           │
                           ▼
@@ -177,11 +179,33 @@ Newsopia's core is a **LangGraph state machine** — a directed acyclic graph wh
 
 ---
 
-## ⚡ Performance Architecture
+## 📄 Enhanced Article Data Collection
+
+Newsopia now fetches **full article content** for the top 8 most relevant articles before passing them to the QA agent — a critical improvement that dramatically increases answer quality.
+
+### Why This Matters
+Before, the pipeline was passing only titles + 300-character snippets to the QA agent. When asked "why did X happen?", the agent had almost no detail to work with. Now:
+
+| Metric | Before | After |
+|--------|--------|-------|
+| **Context per article** | ~300 chars (snippet only) | ~3000 chars (full article text) |
+| **Data availability** | Titles + headlines | Full body text + context |
+| **Why-question success** | Low | High |
+| **Latency** | Fast | +3-5s (parallel fetching) |
+
+### How It Works
+1. After content processor ranks articles by relevance, the **top 8** are selected
+2. **Parallel content fetching** (4 workers, 12s timeout) extracts main text from each URL
+3. Smart CSS selectors target article containers (`<article>`, `.article-body`, etc.)
+4. Fallback to collecting all substantial `<p>` tags if extraction fails
+5. Result: QA agent gets full article text instead of snippets
+
+---
 
 | Optimization | Impact |
 |-------------|--------|
 | **Single-pass pipeline** | Eliminated the old double-call pattern (search + re-answer). ~40-60% faster. |
+| **Full article content fetching** | Top 8 articles get full text extracted in parallel before QA. Transforms "why" answer quality. Non-blocking — failures silently skip. |
 | **Parallel agent execution** | Financial + Global + Social agents run simultaneously with individual 20s timeouts. ~3× faster than sequential. |
 | **Parallel enrichment layer** | 5 enrichment agents (Fact Check, Trend, Sentiment, Regional, Bias) run in parallel via ThreadPoolExecutor with 15s timeout. Non-blocking — failures are silently skipped. |
 | **Parallel web scraping** | 3 search engines queried simultaneously. |
@@ -191,6 +215,7 @@ Newsopia's core is a **LangGraph state machine** — a directed acyclic graph wh
 | **Fast-path routing** | Regex instant-match for greetings/help. Simple queries skip LLM in QueryAnalyzer and SearchOptimizer. |
 | **Graceful error recovery** | Every agent node is wrapped in try/except — one failing agent doesn't crash the pipeline. Multi-analysis tracks failed agents and proceeds with available results. |
 | **Streaming output** | `stream_chat_search()` yields tokens progressively for real-time UI feedback. |
+| **GPT-4o for answers** | QA agent uses GPT-4o (not mini) for final answer generation — better reasoning over rich article content. All other agents use gpt-4o-mini for cost efficiency. |
 
 ---
 
@@ -277,7 +302,7 @@ Cross-referencing is the strongest differentiator — rather than relying on a s
 | Layer | Technology |
 |-------|-----------|
 | **Orchestration** | LangGraph (directed state graph) |
-| **LLM** | OpenAI GPT-4o-mini (temp=0 for deterministic output) |
+| **LLM** | OpenAI: GPT-4o for QA agent (answer generation), GPT-4o-mini for all other agents (cost efficiency) |
 | **Frontend** | Streamlit with custom CSS (glassmorphism dark theme) |
 | **Database** | Supabase (PostgreSQL + Row-Level Security) |
 | **Financial Data** | yfinance → Finnhub → FMP → Twelve Data → Polygon.io (5-tier fallback chain) |
@@ -317,6 +342,40 @@ Open `http://localhost:8501` in your browser.
 
 ---
 
+## 🔗 Multi-Domain Knowledge Graph
+
+Newsopia now features a sophisticated **knowledge graph engine** that connects disparate domains (war, finance, energy, geopolitics, social, tech, health, trade, environment, food, economy) to uncover hidden relationships and blind spots.
+
+### How It Works
+
+When you ask a question, the system:
+
+1. **Detects the primary domain(s)** from your query using keyword matching and entity recognition
+2. **Traverses the knowledge graph** to find 1-2 hop neighbors across related domains (e.g., War → Energy → Finance → Markets)
+3. **Identifies blind spots** — domains connected to your query but not covered by scraped articles
+4. **Extracts cross-article entities** — recognizes when the same actors/organizations appear across multiple articles
+5. **Synthesizes cross-domain intelligence** — generates a brief explaining causal chains and interconnected impacts
+
+### Why This Matters
+
+**Example:** You ask "What's happening with the war in Ukraine?"
+- **Old behavior:** Shows articles about military operations and casualties
+- **New behavior:** Automatically maps War → Energy (oil sanctions) → Finance (markets) → Trade (grain exports) → Food (prices) — connecting the dots the articles don't explicitly mention
+
+The system flags **blind spots** (e.g., "Trade domain is connected but only 20% covered by articles") so you know what's missing from the news coverage.
+
+### The 44-Edge Ontology
+
+The knowledge graph includes 44 weighted, causal relationships like:
+- War DISRUPTS Energy (weight: 9)
+- Energy INFLUENCES Finance (weight: 9)
+- Trade AFFECTS Food (weight: 8)
+- Geopolitics DRIVES Tech (weight: 7)
+
+Each edge includes a causal description (e.g., "sanctions block oil supplies, raising prices globally") so the LLM can reason about **why** domains are connected, not just **that** they are.
+
+---
+
 ## 📈 Why Newsopia Is Different
 
 | Traditional Aggregator | Newsopia |
@@ -340,7 +399,7 @@ This project is proprietary. All rights reserved.
 
 <div align="center">
 
-**Built with 🧠 by Gahan K Lal**
+**Developed by Gahan Kumar Lal**
 
 *17 AI agents. 5 search engines. 120+ trusted sources. One intelligent answer.*
 
