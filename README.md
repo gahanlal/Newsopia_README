@@ -53,10 +53,10 @@ Implemented parallel multilingual search and content fetching:
 - Result: Global news coverage without language barriers
 
 ### Phase 4: Credibility & Verification Layer
-Added fact-checking and source verification:
+Added Signal Analysis and source verification:
 - **120+ Trusted Outlets Database**: Cross-reference articles against verified sources
 - **5-Signal Credibility Engine**: Source reputation, cross-referencing, AI verification, linguistic analysis, article structure
-- **Fake News Detector**: Multi-signal analysis producing 0-100 credibility score with verdict
+- **Signal Analysis**: Multi-signal credibility scoring with a single unified output
 
 ### Phase 5: Full 17-Agent Pipeline
 Expanded from 3 domain agents to a complete intelligent pipeline:
@@ -66,7 +66,7 @@ Expanded from 3 domain agents to a complete intelligent pipeline:
 - **AI Summarization** — Parallel summaries with structured insights
 - **3 Specialized Domain Agents** — Financial (with live stock data from 5 APIs), Global (geopolitical analysis), Social (public sentiment) — all run in parallel
 - **Synthesis Engine** — Unifies multi-agent perspectives via LLM
-- **5 Enrichment Agents** — Fact-checking, trend analysis, sentiment mapping, regional impact, bias detection
+- **5 Enrichment Agents** — Signal Analysis, trend analysis, sentiment mapping, regional impact, bias detection
 - **Response Aggregation** — Structures final output
 - **QA Agent** — Handles follow-ups and casual chat with full article content
 
@@ -266,7 +266,7 @@ Newsopia's core is a **LangGraph state machine** — a directed acyclic graph wh
 
 | Agent | Purpose | Key Output |
 |-------|---------|------------|
-| **Fact Check Agent** | Cross-references claims across sources, detects contradictions | Confidence score (0–100), verification labels (✅ High / ⚠️ Partial / ❌ Conflicting) |
+| **Signal Analysis Agent** | Cross-references claims across sources, detects contradictions | Confidence score (0–100), verification labels (✅ High / ⚠️ Partial / ❌ Conflicting) |
 | **Trend Context Agent** | Historical parallels, trajectory analysis | Escalating / Stable / De-escalating trajectory, timeline, pattern detection |
 | **Sentiment Aggregation Agent** | Cross-source mood gauge, emotion breakdown | Sentiment score (0–100), divergence detection between sources |
 | **Regional Impact Agent** | Geographic impact mapping, epicenter detection | Affected regions, personalized local impact based on user location |
@@ -290,7 +290,7 @@ Newsopia's core is a **LangGraph state machine** — a directed acyclic graph wh
 | **Single-pass pipeline** | Eliminated the old double-call pattern (search + re-answer). ~40-60% faster. |
 | **Full article content fetching** | Top 8 articles get full text extracted in parallel before QA. Transforms "why" answer quality. Non-blocking — failures silently skip. |
 | **Parallel agent execution** | Financial + Global + Social agents run simultaneously with 45s per-agent timeout and 75s global deadline. ~3× faster than sequential. |
-| **Parallel enrichment layer** | 5 enrichment agents (Fact Check, Trend, Sentiment, Regional, Bias) run in parallel via ThreadPoolExecutor with 15s timeout. Non-blocking — failures are silently skipped. |
+| **Parallel enrichment layer** | 5 enrichment agents (Signal Analysis, Trend, Sentiment, Regional, Bias) run in parallel via ThreadPoolExecutor with 15s timeout. Non-blocking — failures are silently skipped. |
 | **Parallel web scraping** | 3 search engines queried simultaneously. |
 | **Dynamic summarizer scaling** | Worker pool scales from 4→8 based on article count. |
 | **Response caching** | MD5-hashed cache with 2-min TTL and normalized query keys. Near-identical queries ("Apple stock today" vs "today apple stock") hit the same cache. |
@@ -302,7 +302,7 @@ Newsopia's core is a **LangGraph state machine** — a directed acyclic graph wh
 
 ---
 
-## 🔍 Fact-Checking & Credibility Engine
+## 🔍 Signal Analysis & Credibility Engine
 
 Every article can be analyzed by the **Fake News Detector**, which runs 5 independent signals:
 
@@ -389,7 +389,7 @@ Cross-referencing is the strongest differentiator — rather than relying on a s
 | **Frontend** | Streamlit with custom CSS (glassmorphism dark theme) |
 | **Database** | Supabase (PostgreSQL + Row-Level Security) |
 | **Financial Data** | yfinance → Finnhub → FMP → Twelve Data → Polygon.io (5-tier fallback chain) |
-| **Enrichment** | 5 parallel agents: Fact Check, Trend Context, Sentiment, Regional Impact, Source Bias |
+| **Enrichment** | 5 parallel agents: Signal Analysis, Trend Context, Sentiment, Regional Impact, Source Bias |
 | **Web Scraping** | BeautifulSoup + requests (parallel, multi-engine) |
 | **Caching** | In-memory with MD5 keys + normalized queries |
 | **Deployment** | Streamlit Cloud / any Python host |
